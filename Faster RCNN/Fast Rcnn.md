@@ -102,4 +102,4 @@ Faster RCNN 在已经训练好的 model 的基础上继续进行的训练。
 ![](imgs/20181024-201605.png)
 </div>
 
-此外，还可以用 end-to-end 的方法训练 Faster RCNN
+此外，还可以用 end-to-end 的方法训练 Faster RCNN。
