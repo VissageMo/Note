@@ -1,6 +1,7 @@
 # Faster Rcnn
 参考：[机器学习随笔](https://zhuanlan.zhihu.com/p/31426458)
 <div align=center>
+
 ![](imgs/20181024-151930.png)
 </div>
 Faster Rcnn 包括4个主要部分
@@ -9,7 +10,8 @@ Faster Rcnn 包括4个主要部分
 3.  **Roi Pooling**：该层收集输入的 feature maps 和 proposal 的类别，同时再次 bounding box regression 修正 anchors 获得精确的 proposals 。
 4. **Classification**：利用 proposal feature maps 计算 proposal 的类型，并再次使用 bounding box regression 获得最终的精确 bounding box 。
 <div align=center>
-![](imgs/20181024-150741.png) 
+
+![avatar](imgs/20181024-150741.png) 
 </div>
 ##Conv layers
 13个 conv 层，13个 relu 层， 4个 pooling 层。具有如下特点：
@@ -17,6 +19,7 @@ Faster Rcnn 包括4个主要部分
 2. 所有的 pooling 层都是：kernel_size = 1, pad = 0, stride = 2，图片大小减半
 最终，一个 MxN的图片变为 (M/16)x(N/16)，Conv layers 生成的 feature map都可以和原图对应起来
 <div align=center>
+
 ![](imgs/20181024-152621.png)
 </div>
 ## Region Proposal Networks
@@ -24,10 +27,12 @@ Faster Rcnn 包括4个主要部分
 
 直接使用 RPN 生成检测框，极大地提高检测框的生成速度。网络分为两条线，一条通过 softmax 分类 anchors 获得 foreground 和 background， 下面一条计算用于计算机对 anchors 的 bounding box regression 的偏移量，以获得精确的 proporsal。最后的 Proposal 层负责综合 foreground anchors and bounding box regression 偏移量获取 proposals
 <div align=center>
+
 ![](imgs/20181024-153608.png)
 </div>
 在生成 anchors 的过程中，对每个点生成9个不同形状的 anchors。生成的 9x4 矩阵代表各 anchors 的四个顶点位置。这样生成的 bounding box 并不准确，但是可以通过后续的2次 regression 进行修正。
 <div align=center>
+
 ![](imgs/20181024-160029.png)
 
 ![](imgs/20181024-160313.png)
@@ -36,31 +41,42 @@ Faster Rcnn 包括4个主要部分
 
 ** softmax 判断 foreground 和 background **
 <div align=center>
+
 ![](imgs/20181024-165629.png)
 </div>
 对于RPN输入的 feature map，其尺寸为WxH， 先进行1x1卷积，输出层为 9x2 = 18，对应于 feature map 中的 9 个 anchors 和 background / foreground 2类。因此将信息保存为 W x H x 18，用来进行softmax分类。前后的 Reshape 都是为 caffe 服务，在实际使用中可以根据实际运算情况进行调整。
 
 ** bounding box regression 原理 **
 <div align=center>
+
 ![](imgs/20181024-174717.png)
 </div>
 一般的，每个窗口使用 (x, y, w, h) 四个参数进行标识，在图片中，A代表原始的 Foreground Anchors，G代表目标的 bounding box，因此需想办法设计一个从  A 到 G 的关系，使 A 往 G' 的方向不断发展。
 <div align=center>
+
 ![](imgs/20181024-175155.png)
+
 ![](imgs/20181024-175202.png)
+
 </div>
 通过调整中心位置和缩放的方式，共有四个变换形式，建立线性回归模型对预测框进行微调，只有在微调时可以看作是线性的回归模型，否则需要转化为复杂的非线性问题。
 <div align=center>
+
 ![](imgs/20181024-175651.png)
+
 ![](imgs/20181024-175547.png)
+
 RGN Loss Function
 
 ![](imgs/20181024-175517.png)
+
 </div>
 
 ** 对 proposals 进行的 bounding box regression **
 <div align=center>
+
 ![](imgs/20181024-175946.png)
+
 </div>
 由上节，num_out = 4 * 9 = 36，存储为 [1, 36, H, W]
 
@@ -79,7 +95,9 @@ Proposal layer 有三个输入：fg/bg anchors 分类器的结果 rpn_cls_prob_r
 ### RoI Pooling
 输入为原始的 feature map 和 proposal boxes， 计算出 proposal feature maps。
 <div align=center>
+
 ![](imgs/20181024-200402.png)
+
 </div>
 由于给出的 proposal boxes 的形状并不相同，不能直接放入网络中训练，因此需要转化为固定的尺寸。
 PoI Pooling 的方法是根据设定的 w，h 将原图片划分为 w x h 份， 每一份中进行 max pooling。这样输入被转化为了 w x h 的标准大小。
@@ -87,7 +105,9 @@ PoI Pooling 的方法是根据设定的 w，h 将原图片划分为 w x h 份，
 ### Classification
 通过full connect 和 softmax 计算每个 proposal 属于的类别，输出 cls_prob；再利用 bbox regression 获得位移片量 bbox_pred, 用于更精确的回归。
 <div align=center>
+
 ![](imgs/20181024-200716.png)
+
 </div>
 
 ### Faster RCNN训练
@@ -99,7 +119,9 @@ Faster RCNN 在已经训练好的 model 的基础上继续进行的训练。
 5. 利用4训练好的新 RPN 收集 proposals
 6. 第二次训练 Fast RCNN
 <div align=center>
+
 ![](imgs/20181024-201605.png)
+
 </div>
 
 此外，还可以用 end-to-end 的方法训练 Faster RCNN。

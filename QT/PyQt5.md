@@ -308,6 +308,7 @@ if __name__ == '__main__':
 在
 
 <div align=center>
+
 ![](imgs/20181031-160002.png)
 </div>
 
@@ -358,8 +359,10 @@ if __name__ == '__main__':
 ### 多行见跨越的输入栏
 
 使用 QLineEdit 和 QTextEdit 可以生成输入文本框 ，并使用 QGridLayout 进行排版 。 在 QGridLayout 中，数字并不直接代表位置，其位置和数值不直接相关。
+<div align=center>
 
 ![](imgs/20181031-161559.png)
+</div>
 
 ```
 # -*- coding: utf-8 -*-
