@@ -10,7 +10,7 @@
 
 - 知识储备
     - 机器学习基础
-        - 多层感知机 ：完成
+        - 多层感知机 ：小蓝书只有感知机推导，多层感知机见花书、西瓜书
         - K 临近搜索
         - 支持向量机
         - 神经网络
@@ -29,13 +29,20 @@
     - 深圳实习：deeplab v3的使用
     - 机械臂算法：AlexNet 的使用
 
-## 每日笔记
+# 2019.3.7
 
-### 2019.2.27
+## tensorflow
 
-- 小蓝书 1-2 章：机器学习概论 + 感知机
-    - 利用对偶问题求解线性感知机，通过带入点依次迭代求最终判别方程
+- linear regression:
+  
+  ```python
+    X = tf.placeholder("float")
+    Y = tf.placeholder("float")
 
-### 2019.3.4
+    W = tf.Variable(np.random.randn())
+    b = tf.Variable(np.random.randn())
+  ```
 
-- 
+  在tensorflow定义中，流动的输入输出数据用placeholder定义，系统中需要更新的参数用Variable。预设时可以不设定具体的tensor尺寸，包括参数定义时，可以不定义numpy的随机变量生成的尺寸，可见tensorflow对numpy有很好的支持。
+
+  
