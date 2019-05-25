@@ -175,13 +175,46 @@
 
   - nn.BCELoss
 
-    二分类的交叉熵函数，使用时需要在输入前加sigmoid，
+    二分类的交叉熵函数，使用时需要在输入前加sigmoid。
 
     $$ loss(x_i,y_i)=-w_i[y_ilogx_i+(1-y_i)log(1-x_i)] $$
 
-  - nn.
+    式中，$w_i$表示当前样本的loss权重。对于正负样本不均衡的情况，需要设置来进行平衡
 
-  - 
+    ```python
+    import torch.nn.functional as F
+    loss_fn = torch.nn.BCELoss()
+    input_data = Variable(torch.randn(3, 4))
+    # 虽然只有0，1两种，但torch要求使用torch.FloatTensor格式
+    target = Variable(torch.FloatTensor(3, 4).random_(2))
+    # 此处需要对input做sigmoid运算
+    loss = loss_fn(F.sigmoid(input_data), target)
+    ```
+
+  - nn.BCEWithLogitsLoss
+
+    将BCE和Sigmoid结合，省去一个步骤。经过Sigmoid处理后，数值结果更加稳定，建议使用，性能更好。
+
+    ```python
+    import torch.nn.functional as F
+    loss_fn = torch.nn.BCELossWithLogitsLoss()
+    input_data = Variable(torch.randn(3, 4))
+    # 虽然只有0，1两种，但torch要求使用torch.FloatTensor格式
+    target = Variable(torch.FloatTensor(3, 4).random_(2))
+    # 此处不需要对input做sigmoid运算
+    loss = loss_fn(input_data, target)
+    ```
+
+  - nn.CrossEntropyLoss
+
+    对于多分类问题设计的Loss Function，*当简化为二分类问题时，和logistics回归为同一形式。*
+
+    首先经过一个sigmoid，将输入映射，之后计算交叉熵。由于标签为one hot形式，可以直接对
+
+    $$ {\begin{aligned}
+        loss(x, label) & = -w_{label}log\frac{e^{x_{label}}}{\sum_{j=1}^Ne^x_j} \\
+        & = w_{label}(log\sum^N_{j=1}e^x_j-x^{label})
+    \end{aligned}}$$
 
 - **激活函数**
   
@@ -208,3 +241,110 @@
            Leaky \ ReLU = max(\lambda x, x) \qquad \lambda < 1 $$
 
         由于在小于0的位置，也会有梯度，可以较好地解决 dead relu 问题
+
+### 2019.5.5
+
+#### 目标检测评价标准
+
+Precision, Recall, Accuracy 最早是信息检索领域常用的评价标准。
+
+- Percision / Recall
+  - True Positive : 预测为真，实际为真
+  - True Negative : 预测为假，实际为假
+  - False Positive : 预测为真，实际为假
+  - False Negative : 预测为假，实际为真
+
+  True、False代表预测结果的对错（和实际值相比），Positive、Negative代表预测的结果
+
+  $$ Precision = \frac{TP}{TP+FP} $$
+  $$ Recall = \frac{TP}{TP+FN} $$
+  $$ Accuracy = \frac{TP+TN}{N} $$
+
+  Precision代表精确率，分类为正的样本中多少是正确的，Recall代表召回率，表示真实为正的样本有多少被找到。在实际应用中，Precision的意义是表示提供给用户的数据中，多少是有价值的。
+  
+  两者成对出现，单独使用无法有效判断系统效果，尤其是数据之间极不均衡时。假设数据中99.9%为正例，只需全部预测为正，就可以获得极高的精确率，但系统无效。
+
+  ![img](imgs/8.png)
+
+- F Score
+
+  为解决此类问题，F Score综合两个性能指标。其中，$\beta$用于调和P和R的群众，一般取1。F Score即为P和R的调和平均。
+
+  $$ F Score = \frac{(\beta^2+1)PR}{\beta^2P+R} $$
+
+- Precision and Recall Over Ranks
+  
+  对于有序表，F Score不能很好地表示。因为给出信息的序列也反应系统的性能，即能不能把相关的正确信息尽可能排在序列靠前的位置。
+
+  ![img](imgs/9.png)
+
+  ![img](imgs/10.png)
+
+  如上图，首先计算每个元素的precision和recall，即该元素及之前的元素对应的。这样，就可以根据precision和recall随序列的变化进行带序列的分析。如此我们便可以画出Recall-Precision的关系，以及F1的结果。一般来说，F1 Score会在Recall-Precision相交的地方达到最大值，但是这也不一定。毕竟这个极值其实还是需要满足一定的条件的。但是整体趋势就如同右上的那个小图那样子。
+
+  由于曲线不是一个函数，当需要求某个Recall对应的Precision时，采用取“该点右侧第一个最高的Precision”的策略，如图所示。这里也就是在recall大于要求值之后第一次正确输出时对应的Precision。之后可通过插值，绘制Precision和Recall函数，并进行性能分析。12
+
+  ![img](imgs/11.png)
+  ![img](imgs/12.png)
+
+- Mean Average Precision
+
+  对于Qurey，可以简单理解为平均的Precision。此处只计算结果正确是的Precision。
+
+  ![img](imgs/13.png)
+
+  对于目标检测，采用Precision-Recall曲线下的面积来表示，通常，越好的分类器，AP值越高.多类别采用对各类目标取平均，
+
+  ![img](imgs/14.png)
+
+### 2019.5.6
+
+#### SSD代码细节
+
+- relu（inplace=True）
+  
+  inplace表示直接在之前的数据上，而不储存中间变量，节省内存。
+
+  ```python
+  # inplace = True
+  x = x + 5
+  # inplace = False
+  y = x + 5
+  x = y
+  ```
+
+- nn.conv2d(bias=False)
+
+    Resnet的所有卷积层都不带bias
+
+### 2019.5.7
+
+#### GIOU Loss [link](https://arxiv.org/abs/1902.09630)
+
+现有目标检测的Loss普遍采用预测bbox与ground truth bbox的1-范数，2-范数来作为loss。但是评测的时候却又采用IOU来判断是否检测到目标。显然二者有一个Gap，即loss低不代表IOU就一定小。
+
+![img](imgs/15.jpg)
+
+- 主要思路
+
+  对于两个bbox A B，计算能包围A、B的最小包围框C。则
+
+  $$ GIOU = IOU - \frac{C-(A\cup B)}{C} $$
+
+  GIOU计算简单，从结构来看具有以下特点
+
+  - GIOU 是 IOU 的下界，取值范围为 $(-1, 1]$ ,当两个框不重合，不管相聚多远 IOU 都是0，但 GIOU 会在 $(-1, 0)$ 之间变化。
+
+- 实验结果
+
+  对 Yolo 提升在 2% 左右，mask rcnn较少，可能是因为 Mask RCNN 中无法重合的情况较少。
+
+### 2019.5.9
+
+#### Lottery Ticket Hypothesis
+
+### 2019.5.14
+
+#### AP50
+
+除了最常用的AP和mAP，目标检测评价中还经常出现诸如$AP_50$,$AP_70$之类的评价指标，这些指的是取detector的IoU阈值大于0.5、0.7等。阈值越大，检测精确度越高，也越难。
