@@ -348,3 +348,87 @@ Precision, Recall, Accuracy 最早是信息检索领域常用的评价标准。
 #### AP50
 
 除了最常用的AP和mAP，目标检测评价中还经常出现诸如$AP_50$,$AP_70$之类的评价指标，这些指的是取detector的IoU阈值大于0.5、0.7等。阈值越大，检测精确度越高，也越难。
+
+### 2019.6.1
+
+#### collections
+
+collections是python内建的一个结合模块，提供了许多集合类。
+
+- namedtuple
+
+  用来建立带名字的tuple，适用于没必要建立Class而有需要命名的情况。既具备tuple的不变性，又可以根据属性索引。
+
+  ```python
+  from collections import namedtuple
+
+  Point = namedtuple('Point', ['x', 'y'])
+  p = Point(1, 2)
+  print(p.x) # 1
+  print(p.y) # 2
+
+  isinstance(p, Point) # True
+  isinstance(p, tuple) # True
+  ```
+
+- deque
+
+  对list的增强，除了支持append和pop，加入appendleft和popleft，能够从头部添加或删除。
+
+  ```python
+  from collections import deque
+
+  q = deque(['a','b','c'])
+  q.appendleft('x') # ['x', 'a', 'b', 'c']
+  q.popleft('x') # x
+  ```
+
+- defaultdict
+
+  使用dict时，引用不存在的key会输出`keyerror`，而defaultdict可以返回一个默认值
+
+  ```python
+  from collections import defaultdict
+
+  dd = defaultdict(lambda: 'N/A')
+  dd['1']  # N/A
+  ```
+
+- OrderedDict
+
+  会按照key定义的顺序插入，而不是key的名称。可以依次实现一个先进先出的dict，固定容量。
+
+  ```python
+  from collections import OrderdDict
+
+  class LastUpdatedOrderedDict(OrderedDict):
+
+      def __init__(self, capacity):
+          super(LastUpdateOrderedDict, self).__init__()
+          self._capacity = capacirty
+
+      def __setitem__(self, key, value):
+          containsKey = 1 if key in self else 0:
+          if len(self) - containKey >= self._capacity:
+              last = self.popitem(last=False)
+              print('remove', last)
+          if containKey:
+              del self[key]
+              print('set:', (key, value))
+          else:
+              print('add:', (key, value))
+          OrderedDict.__setitem__(self, key, value)
+  ```
+
+- Counter
+
+  Counter是一个简单计数器，用于统计字符出现次数。Count本身是dict的一个子类，对于未出现过得字符，会自动生成key，因此更加方便
+
+  ```python
+  from collections import Counter
+
+  c = Counter()
+  for ch in 'mowenhao':
+    c[ch] += 1
+  ```
+  
