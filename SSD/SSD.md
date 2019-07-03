@@ -16,13 +16,13 @@ SSD 网络是一个兼具精度和运算效率的 one—stage 网络，精度高
 
 前半段采用VGG-16网络，再连接数个卷积网络（称为FC层）。利用stride=2的卷积层缩小图像分辨率，每层经过两次卷积后输出一次分类结果。
 
-- FC4_3: (Output: Conv 3x3x(4xClasses+4))
+- FC4_3: (Output: Conv 3x3x(4x(Classes+4)))
 - FC6: Conv 3x3x1024
-- FC7: Conv 1x1x1024 (Output: Conv 3x3x(6xClasses+4))
-- FC8: Conv 1x1x256 + Conv 3x3x512 stride=2 (Output: Conv 3x3x(6xClasses+4))
-- FC9: Conv 1x1x128 + Conv 3x3x256 stride=2 (Output: Conv 3x3x(6xClasses+4))
-- FC10: Conv 1x1x128 + Conv 3x3x256 (Output: Conv 3x3x(4xClasses+4))
-- FC11: Conv 1x1x128 + Conv 3x3x256 (Output: Conv 3x3x(4xClasses+4))
+- FC7: Conv 1x1x1024 (Output: Conv 3x3x(6x(Classes+4)))
+- FC8: Conv 1x1x256 + Conv 3x3x512 stride=2 (Output: Conv 3x3x(6x(Classes+4)))
+- FC9: Conv 1x1x128 + Conv 3x3x256 stride=2 (Output: Conv 3x3x(6x(Classes+4)))
+- FC10: Conv 1x1x128 + Conv 3x3x256 (Output: Conv 3x3x(4x(Classes+4)))
+- FC11: Conv 1x1x128 + Conv 3x3x256 (Output: Conv 3x3x(4x(Classes+4)))
 
 最终每类的检测个数：38x38x4 + 19x19x6 + 10x10x6 + 5x5x6 + 3x3x4 + 1x1x4 = 8732
 

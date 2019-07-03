@@ -35,4 +35,4 @@ DetNet是一种专为目标检测任务设计的backbone。
 
 在小物体和大物体检测中，均取得比ResNet更好地结果。
 
- ![imgs](imgs/3.png)
+![imgs](imgs/3.png)
